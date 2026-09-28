@@ -1,12 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import { useTheme } from 'next-themes';
-import { Menu, Moon, Sun, User, WalletCards } from 'lucide-react';
+import { Menu, Moon, Sun, User, WalletCards, LogOut } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 
 export function Header() {
   const { theme, setTheme } = useTheme();
   const pathname = usePathname();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const { data: session } = useSession();
   
   // Basic title logic based on pathname
   let title = 'Dashboard';
@@ -49,8 +53,40 @@ export function Header() {
           <Moon className="absolute h-5 w-5 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
         </button>
         
-        <div className="h-8 w-8 rounded-full bg-secondary-bg border border-border flex items-center justify-center overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all">
-          <User className="w-5 h-5 text-muted-fg" />
+        <div className="relative">
+          <button
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className="h-8 w-8 rounded-full bg-secondary-bg border border-border flex items-center justify-center overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all focus:outline-none"
+            aria-expanded={showUserMenu}
+            aria-haspopup="true"
+          >
+            <User className="w-5 h-5 text-muted-fg" />
+          </button>
+          
+          {showUserMenu && (
+            <div className="absolute right-0 mt-2 w-56 rounded-md border border-border bg-card shadow-lg py-1 z-50">
+              <div className="px-4 py-3 border-b border-border">
+                <p className="text-sm font-medium text-foreground">
+                  {session?.user?.name || 'User'}
+                </p>
+                <p className="text-xs text-secondary-fg truncate">
+                  {session?.user?.email || 'user@example.com'}
+                </p>
+              </div>
+              <div className="py-1">
+                <button
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    signOut({ callbackUrl: '/login' });
+                  }}
+                  className="flex w-full items-center px-4 py-2 text-sm text-red-500 hover:bg-secondary-bg transition-colors"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>

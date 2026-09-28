@@ -74,7 +74,7 @@ export function CategoryForm() {
             <Label htmlFor="type">Type</Label>
             <Select
               value={typeValue}
-              onValueChange={(val: 'EXPENSE' | 'INCOME') => setValue('type', val)}
+              onValueChange={(val) => val && setValue('type', val as 'EXPENSE' | 'INCOME')}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select type" />

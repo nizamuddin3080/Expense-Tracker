@@ -33,7 +33,7 @@ export function AccountForm() {
     control,
     formState: { errors },
   } = useForm<CreateAccountInput>({
-    resolver: zodResolver(createAccountSchema),
+    resolver: zodResolver(createAccountSchema) as any,
     defaultValues: {
       name: '',
       type: 'BANK',

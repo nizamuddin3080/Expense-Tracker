@@ -1,6 +1,6 @@
 import { getAccounts } from '@/server/queries/account.queries';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { ACCOUNT_TYPE_ICONS, ACCOUNT_TYPE_LABELS } from '@/lib/constants';
 import { formatCurrency } from '@/lib/format';
 import Link from 'next/link';
@@ -30,12 +30,10 @@ export default async function AccountsPage() {
             Manage your cash, bank accounts, credit cards, and digital wallets.
           </p>
         </div>
-        <Button asChild>
-          <Link href="/accounts/new">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Account
-          </Link>
-        </Button>
+        <Link href="/accounts/new" className={buttonVariants({ variant: 'default' })}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Account
+        </Link>
       </div>
 
       {accounts.length === 0 ? (
@@ -48,12 +46,10 @@ export default async function AccountsPage() {
             <p className="mt-2 text-center text-sm font-normal leading-6 text-muted-foreground">
               You don&apos;t have any accounts yet. Add your first account to start tracking your finances.
             </p>
-            <Button asChild className="mt-6">
-              <Link href="/accounts/new">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Account
-              </Link>
-            </Button>
+            <Link href="/accounts/new" className={buttonVariants({ variant: 'default', className: 'mt-6' })}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Account
+            </Link>
           </div>
         </div>
       ) : (

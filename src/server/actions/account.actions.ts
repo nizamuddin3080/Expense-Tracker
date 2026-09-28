@@ -27,7 +27,6 @@ export async function createAccountAction(data: CreateAccountInput): Promise<Act
 
     const { name, type, openingBalance, currency, icon } = validatedData.data;
 
-    // Get max sort order to append new account at the end
     const lastAccount = await db.account.findFirst({
       where: { userId: session.user.id },
       orderBy: { sortOrder: 'desc' },
@@ -48,9 +47,6 @@ export async function createAccountAction(data: CreateAccountInput): Promise<Act
     });
 
     revalidatePath('/accounts');
-    
-    // We can't return Decimal objects to the client in server actions easily,
-    // so we can just return success true
     return { success: true, data: { id: account.id } };
   } catch (error) {
     console.error('Failed to create account:', error);
@@ -78,7 +74,6 @@ export async function updateAccountAction(data: UpdateAccountInput): Promise<Act
 
     const { id, name, type, openingBalance, currency, icon, isActive } = validatedData.data;
 
-    // Check if account belongs to user
     const existingAccount = await db.account.findUnique({
       where: { id, userId: session.user.id },
     });
@@ -116,26 +111,11 @@ export async function deleteAccountAction(id: string): Promise<ActionResult<any>
 
     const existingAccount = await db.account.findUnique({
       where: { id, userId: session.user.id },
-      include: {
-        _count: {
-          select: { transactions: true } // Assuming transactions relation exists. Let's check or just deactivate
-        }
-      }
     });
 
     if (!existingAccount) {
       return { success: false, error: 'Account not found' };
     }
-
-    // Since deleting an account with transactions might violate foreign keys (or cascade),
-    // and financial data shouldn't usually be deleted, let's deactivate it if it has transactions.
-    
-    // Actually, looking at the schema:
-    // transactions: account @relation("SourceAccount", onDelete: Restrict)
-    // So we can't delete it if there are transactions.
-    
-    // Instead of querying _count which might fail if not in schema, let's just use try/catch 
-    // or just deactivate.
     
     try {
       await db.account.delete({

@@ -33,7 +33,7 @@ export default function RegisterPage() {
     setIsPending(true);
     try {
       const result = await registerAction(data);
-      if (result?.error) {
+      if (!result.success) {
         toast.error(result.error);
       } else {
         toast.success('Registration successful! Please log in.');

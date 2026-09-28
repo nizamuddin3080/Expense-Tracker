@@ -31,7 +31,7 @@ export default function LoginPage() {
     setIsPending(true);
     try {
       const result = await loginAction(data);
-      if (result?.error) {
+      if (!result.success) {
         toast.error(result.error);
       } else {
         toast.success('Login successful!');

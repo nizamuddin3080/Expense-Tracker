@@ -1,0 +1,293 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// -----------------------------------------------------------------------------
+// 4.1 Entity: User
+// -----------------------------------------------------------------------------
+model User {
+  id                 String   @id @default(cuid())
+  name               String
+  email              String   @unique
+  passwordHash       String
+  defaultCurrency    String   @default("BDT")
+  defaultAccountId   String?
+  dateFormat         String   @default("DD/MM/YYYY")
+  theme              String   @default("system")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  accounts           Account[]
+  categories         Category[]
+  transactions       Transaction[]
+  budgets            Budget[]
+  recurringTxs       RecurringTransaction[]
+  tags               Tag[]
+  goals              SavingsGoal[]
+  notifications      Notification[]
+}
+
+// -----------------------------------------------------------------------------
+// 4.2 Entity: Account
+// -----------------------------------------------------------------------------
+// Enum String removed for SQLite compatibility
+// Values were in original schema
+
+model Account {
+  id               String      @id @default(cuid())
+  userId           String
+  name             String
+  type String
+  icon             String?
+  openingBalance   Decimal     
+  currency         String      @default("BDT")
+  isActive         Boolean     @default(true)
+  sortOrder        Int         @default(0)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  user             User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  sourceTxs        Transaction[] @relation("SourceAccount")
+  destTxs          Transaction[] @relation("DestAccount")
+  recurringTxs     RecurringTransaction[]
+
+  @@index([userId])
+}
+
+// -----------------------------------------------------------------------------
+// 4.3 Entity: Category
+// -----------------------------------------------------------------------------
+// Enum String removed for SQLite compatibility
+// Values were in original schema
+
+model Category {
+  id               String       @id @default(cuid())
+  userId           String?      // Null means system default
+  name             String
+  type String
+  icon             String?
+  color            String?
+  parentId         String?
+  isDefault        Boolean      @default(false)
+  isActive         Boolean      @default(true)
+  sortOrder        Int          @default(0)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  user             User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent           Category?    @relation("Subcategories", fields: [parentId], references: [id], onDelete: Restrict)
+  subcategories    Category[]   @relation("Subcategories")
+  transactions     Transaction[] @relation("Category")
+  subTransactions  Transaction[] @relation("Subcategory")
+  budgets          Budget[]
+  recurringTxs     RecurringTransaction[] @relation("RecCategory")
+  recSubTxs        RecurringTransaction[] @relation("RecSubcategory")
+
+  @@index([userId, type])
+}
+
+// -----------------------------------------------------------------------------
+// 4.4 Entity: Transaction (UNIFIED MODEL - CRITICAL)
+// -----------------------------------------------------------------------------
+// Enum String removed for SQLite compatibility
+// Values were in original schema
+
+model Transaction {
+  id                     String           @id @default(cuid())
+  userId                 String
+  type String
+  amount                 Decimal           // ALWAYS POSITIVE
+  
+  // Source account for expenses/transfers, destination for income
+  accountId              String
+  
+  // Destination account for transfers ONLY
+  toAccountId            String?
+  
+  // Null for transfers
+  categoryId             String?
+  subcategoryId          String?
+  
+  date                   DateTime
+  merchant               String?
+  paymentMethod          String?
+  note                   String?          
+  
+  isRecurring            Boolean          @default(false)
+  recurringTransactionId String?
+  
+  isDeleted              Boolean          @default(false)
+  deletedAt              DateTime?
+  
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+
+  user                   User             @relation(fields: [userId], references: [id], onDelete: Restrict)
+  account                Account          @relation("SourceAccount", fields: [accountId], references: [id], onDelete: Restrict)
+  toAccount              Account?         @relation("DestAccount", fields: [toAccountId], references: [id], onDelete: Restrict)
+  category               Category?        @relation("Category", fields: [categoryId], references: [id], onDelete: Restrict)
+  subcategory            Category?        @relation("Subcategory", fields: [subcategoryId], references: [id], onDelete: Restrict)
+  recurringTx            RecurringTransaction? @relation(fields: [recurringTransactionId], references: [id], onDelete: SetNull)
+  
+  tags                   TransactionTag[]
+  attachments            Attachment[]
+
+  @@index([userId, date])
+  @@index([userId, type])
+  @@index([userId, categoryId])
+  @@index([userId, accountId])
+  @@index([userId, isDeleted])
+}
+
+// -----------------------------------------------------------------------------
+// 4.5 & 4.6 Entity: Tag and TransactionTag (Join Table)
+// -----------------------------------------------------------------------------
+model Tag {
+  id           String           @id @default(cuid())
+  userId       String
+  name         String
+  createdAt    DateTime         @default(now())
+
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions TransactionTag[]
+
+  @@unique([userId, name])
+  @@index([userId, name])
+}
+
+model TransactionTag {
+  transactionId String
+  tagId         String
+
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  tag           Tag         @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([transactionId, tagId])
+}
+
+// -----------------------------------------------------------------------------
+// 4.7 Entity: Attachment
+// -----------------------------------------------------------------------------
+model Attachment {
+  id             String      @id @default(cuid())
+  transactionId  String
+  fileName       String
+  originalName   String
+  mimeType       String
+  size           Int
+  path           String
+  createdAt      DateTime    @default(now())
+
+  transaction    Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+}
+
+// -----------------------------------------------------------------------------
+// 4.8 Entity: Budget
+// -----------------------------------------------------------------------------
+model Budget {
+  id         String   @id @default(cuid())
+  userId     String
+  categoryId String
+  amount     Decimal  
+  month      Int      // 1-12
+  year       Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, categoryId, month, year])
+  @@index([userId, month, year])
+}
+
+// -----------------------------------------------------------------------------
+// 4.9 Entity: RecurringTransaction
+// -----------------------------------------------------------------------------
+// Enum String removed for SQLite compatibility
+// Values were in original schema
+
+model RecurringTransaction {
+  id                 String       @id @default(cuid())
+  userId             String
+  type String
+  amount             Decimal      
+  accountId          String
+  categoryId         String?
+  subcategoryId      String?
+  merchant           String?
+  note               String?      
+  frequency String
+  interval           Int          @default(1) // For custom: every N days
+  startDate          DateTime
+  endDate            DateTime?
+  nextDueDate        DateTime
+  lastProcessedDate  DateTime?
+  isActive           Boolean      @default(true)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  user               User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  account            Account      @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  category           Category?    @relation("RecCategory", fields: [categoryId], references: [id], onDelete: Restrict)
+  subcategory        Category?    @relation("RecSubcategory", fields: [subcategoryId], references: [id], onDelete: Restrict)
+  transactions       Transaction[]
+
+  @@index([userId, nextDueDate])
+}
+
+// -----------------------------------------------------------------------------
+// 4.10 & 4.11 Entity: SavingsGoal & GoalTransaction
+// -----------------------------------------------------------------------------
+model SavingsGoal {
+  id             String    @id @default(cuid())
+  userId         String
+  name           String
+  targetAmount   Decimal   
+  currentAmount  Decimal    @default(0)
+  targetDate     DateTime?
+  icon           String?
+  color          String?
+  isCompleted    Boolean   @default(false)
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions   GoalTransaction[]
+}
+
+model GoalTransaction {
+  id        String      @id @default(cuid())
+  goalId    String
+  amount    Decimal      // positive=deposit, negative=withdrawal
+  note      String?
+  date      DateTime
+  createdAt DateTime    @default(now())
+
+  goal      SavingsGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+}
+
+// -----------------------------------------------------------------------------
+// 4.12 Entity: Notification (V1.1)
+// -----------------------------------------------------------------------------
+// Enum String removed for SQLite compatibility
+// Values were in original schema
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type String
+  title     String
+  message   String
+  isRead    Boolean          @default(false)
+  data      String?            // Extra context payload
+  createdAt DateTime         @default(now())
+
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

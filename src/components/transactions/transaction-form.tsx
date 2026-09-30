@@ -108,7 +108,7 @@ export function TransactionForm({ accounts, categories }: TransactionFormProps) 
         <div className="space-y-2">
           <Label htmlFor="accountId">{type === 'TRANSFER' ? 'From Account' : 'Account'}</Label>
           <Select 
-            onValueChange={(val) => form.setValue('accountId', val)} 
+            onValueChange={(val) => form.setValue('accountId', val as string)} 
             value={form.watch('accountId') || ''}
           >
             <SelectTrigger id="accountId">
@@ -129,7 +129,7 @@ export function TransactionForm({ accounts, categories }: TransactionFormProps) 
           <div className="space-y-2">
             <Label htmlFor="toAccountId">To Account</Label>
             <Select 
-              onValueChange={(val) => form.setValue('toAccountId', val)} 
+              onValueChange={(val) => form.setValue('toAccountId', val as string)} 
               value={form.watch('toAccountId') || ''}
             >
               <SelectTrigger id="toAccountId">
@@ -151,7 +151,7 @@ export function TransactionForm({ accounts, categories }: TransactionFormProps) 
           <div className="space-y-2">
             <Label htmlFor="categoryId">Category</Label>
             <Select 
-              onValueChange={(val) => form.setValue('categoryId', val)} 
+              onValueChange={(val) => form.setValue('categoryId', val as string)} 
               value={form.watch('categoryId') || ''}
             >
               <SelectTrigger id="categoryId">

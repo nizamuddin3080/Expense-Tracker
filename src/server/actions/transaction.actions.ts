@@ -145,3 +145,17 @@ export async function deleteTransactionAction(id: string): Promise<ActionResult<
     return { success: false, error: error.message || 'Failed to delete transaction' };
   }
 }
+
+export async function getTransactionFormData() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' };
+  }
+  
+  const [accounts, categories] = await Promise.all([
+    db.account.findMany({ where: { userId: session.user.id, isActive: true } }),
+    db.category.findMany({ where: { OR: [{ userId: session.user.id }, { userId: null }] } }),
+  ]);
+  
+  return { success: true, data: { accounts, categories } };
+}

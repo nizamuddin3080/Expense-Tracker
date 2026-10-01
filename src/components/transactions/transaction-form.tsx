@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createTransactionSchema, CreateTransactionInput } from '@/lib/validators';
-import { createTransactionAction } from '@/server/actions/transaction.actions';
+import { createTransactionAction, updateTransactionAction } from '@/server/actions/transaction.actions';
 import { AccountWithBalance, CategoryWithSubcategories, TransactionType } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,17 +14,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 
 interface TransactionFormProps {
-  accounts: AccountWithBalance[];
-  categories: CategoryWithSubcategories[];
+  accounts: AccountWithBalance[] | any[];
+  categories: CategoryWithSubcategories[] | any[];
+  initialData?: any; // To allow pre-populating form for edit mode
+  onSuccess?: () => void;
 }
 
-export function TransactionForm({ accounts, categories }: TransactionFormProps) {
+export function TransactionForm({ accounts, categories, initialData, onSuccess }: TransactionFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<CreateTransactionInput>({
-    resolver: zodResolver(createTransactionSchema),
-    defaultValues: {
+  const form = useForm<any>({
+    resolver: zodResolver(initialData ? (require('@/lib/validators').updateTransactionSchema) : createTransactionSchema),
+    defaultValues: initialData ? {
+      id: initialData.id,
+      type: initialData.type,
+      amount: initialData.amount.toString(),
+      accountId: initialData.accountId,
+      categoryId: initialData.categoryId || '',
+      toAccountId: initialData.toAccountId || '',
+      date: new Date(initialData.date).toISOString().split('T')[0],
+      merchant: initialData.merchant || '',
+      note: initialData.note || '',
+    } : {
       type: TransactionType.EXPENSE,
       amount: '',
       accountId: '',
@@ -40,15 +52,22 @@ export function TransactionForm({ accounts, categories }: TransactionFormProps) 
   
   const typeCategories = categories.filter(c => c.type === type);
 
-  async function onSubmit(data: CreateTransactionInput) {
+  async function onSubmit(data: any) {
     setIsLoading(true);
     try {
-      const result = await createTransactionAction(data);
+      const result = initialData 
+        ? await updateTransactionAction(data)
+        : await createTransactionAction(data);
+        
       if (result.success) {
-        toast.success('Transaction created successfully');
-        router.push('/transactions');
+        toast.success(`Transaction ${initialData ? 'updated' : 'created'} successfully`);
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          router.push('/transactions');
+        }
       } else {
-        toast.error(result.error || 'Failed to create transaction');
+        toast.error(result.error || `Failed to ${initialData ? 'update' : 'create'} transaction`);
         if (result.fieldErrors) {
           Object.entries(result.fieldErrors).forEach(([field, errors]) => {
             if (errors) {
@@ -87,7 +106,7 @@ export function TransactionForm({ accounts, categories }: TransactionFormProps) 
             </SelectContent>
           </Select>
           {form.formState.errors.type && (
-            <p className="text-sm text-red-500">{form.formState.errors.type.message}</p>
+            <p className="text-sm text-red-500">{form.formState.errors.type.message as string}</p>
           )}
         </div>
 
@@ -101,7 +120,7 @@ export function TransactionForm({ accounts, categories }: TransactionFormProps) 
             {...form.register('amount')} 
           />
           {form.formState.errors.amount && (
-            <p className="text-sm text-red-500">{form.formState.errors.amount.message}</p>
+            <p className="text-sm text-red-500">{form.formState.errors.amount.message as string}</p>
           )}
         </div>
 
@@ -121,7 +140,7 @@ export function TransactionForm({ accounts, categories }: TransactionFormProps) 
             </SelectContent>
           </Select>
           {form.formState.errors.accountId && (
-            <p className="text-sm text-red-500">{form.formState.errors.accountId.message}</p>
+            <p className="text-sm text-red-500">{form.formState.errors.accountId.message as string}</p>
           )}
         </div>
 
@@ -142,7 +161,7 @@ export function TransactionForm({ accounts, categories }: TransactionFormProps) 
               </SelectContent>
             </Select>
             {form.formState.errors.toAccountId && (
-              <p className="text-sm text-red-500">{form.formState.errors.toAccountId.message}</p>
+              <p className="text-sm text-red-500">{form.formState.errors.toAccountId.message as string}</p>
             )}
           </div>
         )}
@@ -164,7 +183,7 @@ export function TransactionForm({ accounts, categories }: TransactionFormProps) 
               </SelectContent>
             </Select>
             {form.formState.errors.categoryId && (
-              <p className="text-sm text-red-500">{form.formState.errors.categoryId.message}</p>
+              <p className="text-sm text-red-500">{form.formState.errors.categoryId.message as string}</p>
             )}
           </div>
         )}
@@ -177,7 +196,7 @@ export function TransactionForm({ accounts, categories }: TransactionFormProps) 
             {...form.register('date')} 
           />
           {form.formState.errors.date && (
-            <p className="text-sm text-red-500">{form.formState.errors.date.message}</p>
+            <p className="text-sm text-red-500">{form.formState.errors.date.message as string}</p>
           )}
         </div>
 
@@ -189,7 +208,7 @@ export function TransactionForm({ accounts, categories }: TransactionFormProps) 
             {...form.register('merchant')} 
           />
           {form.formState.errors.merchant && (
-            <p className="text-sm text-red-500">{form.formState.errors.merchant.message}</p>
+            <p className="text-sm text-red-500">{form.formState.errors.merchant.message as string}</p>
           )}
         </div>
 
@@ -201,7 +220,7 @@ export function TransactionForm({ accounts, categories }: TransactionFormProps) 
             {...form.register('note')} 
           />
           {form.formState.errors.note && (
-            <p className="text-sm text-red-500">{form.formState.errors.note.message}</p>
+            <p className="text-sm text-red-500">{form.formState.errors.note.message as string}</p>
           )}
         </div>
       </div>

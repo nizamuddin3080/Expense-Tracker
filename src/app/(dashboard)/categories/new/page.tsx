@@ -1,12 +1,16 @@
 import { Metadata } from 'next';
 import { CategoryForm } from '@/components/categories/category-form';
+import { getCategories } from '@/server/queries/category.queries';
 
 export const metadata: Metadata = {
   title: 'New Category | FinTrack',
   description: 'Create a new category for your transactions.',
 };
 
-export default function NewCategoryPage() {
+export default async function NewCategoryPage() {
+  const categories = await getCategories();
+  const parentCategories = categories.filter((c) => !c.parentId);
+
   return (
     <div className="container mx-auto p-4 md:p-6 lg:p-8">
       <div className="mb-6">
@@ -15,7 +19,7 @@ export default function NewCategoryPage() {
           Add a custom category to better organize your finances.
         </p>
       </div>
-      <CategoryForm />
+      <CategoryForm parentCategories={parentCategories} />
     </div>
   );
 }

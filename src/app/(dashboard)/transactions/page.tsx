@@ -3,24 +3,37 @@ import { getTransactions } from '@/server/queries/transaction.queries';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { TRANSACTION_TYPE_COLORS } from '@/lib/constants';
 import { TransactionType } from '@/types';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
+import { TransactionFilters } from '@/components/transactions/transaction-filters';
 
-export default async function TransactionsPage() {
-  const { items: transactions } = await getTransactions({});
+export default async function TransactionsPage({
+  searchParams,
+}: {
+  searchParams: { search?: string; type?: string; accountId?: string; categoryId?: string; page?: string };
+}) {
+  const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
+  const filters = {
+    search: searchParams.search,
+    type: searchParams.type ? (searchParams.type as TransactionType) : undefined,
+    accountId: searchParams.accountId,
+    categoryId: searchParams.categoryId,
+  };
+
+  const { items: transactions, totalCount, nextCursor } = await getTransactions(filters, page, 50);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Transactions</h1>
-        <Link href="/transactions/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Transaction
-          </Button>
+        <Link href="/transactions/new" className={buttonVariants()}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Transaction
         </Link>
       </div>
+      
+      <TransactionFilters />
 
       <Card>
         <CardHeader>
@@ -51,7 +64,9 @@ export default async function TransactionsPage() {
                     return (
                       <tr key={tx.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                         <td className="p-4 align-middle whitespace-nowrap">
-                          {formatDate(tx.date)}
+                          <Link href={`/transactions/${tx.id}`} className="hover:underline">
+                            {formatDate(tx.date)}
+                          </Link>
                         </td>
                         <td className="p-4 align-middle capitalize">
                           {tx.type.toLowerCase()}

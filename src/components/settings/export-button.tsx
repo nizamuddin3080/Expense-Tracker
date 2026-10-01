@@ -1,18 +1,19 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { exportTransactionsCSV } from '@/server/actions/export.actions';
+import { exportTransactionsCSV, exportFullBackupJSON } from '@/server/actions/export.actions';
 import { Download } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function ExportDataSection() {
-  const [isExporting, setIsExporting] = useState(false);
+  const [isExportingCSV, setIsExportingCSV] = useState(false);
+  const [isExportingJSON, setIsExportingJSON] = useState(false);
 
-  const handleExport = async () => {
+  const handleExportCSV = async () => {
     try {
-      setIsExporting(true);
+      setIsExportingCSV(true);
       const result = await exportTransactionsCSV();
       
       if (!result.success) {
@@ -30,13 +31,43 @@ export function ExportDataSection() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        toast.success('Export successful');
+        toast.success('CSV Export successful');
       }
     } catch (error) {
       console.error(error);
       toast.error('An unexpected error occurred during export');
     } finally {
-      setIsExporting(false);
+      setIsExportingCSV(false);
+    }
+  };
+
+  const handleExportJSON = async () => {
+    try {
+      setIsExportingJSON(true);
+      const result = await exportFullBackupJSON();
+      
+      if (!result.success) {
+        toast.error(result.error || 'Failed to export data');
+        return;
+      }
+      
+      if (result.data) {
+        const blob = new Blob([result.data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `fintrack_backup_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast.success('JSON Backup successful');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An unexpected error occurred during backup');
+    } finally {
+      setIsExportingJSON(false);
     }
   };
 
@@ -44,12 +75,16 @@ export function ExportDataSection() {
     <Card>
       <CardHeader>
         <CardTitle>Export Data</CardTitle>
-        <CardDescription>Download all your transaction data as a CSV file</CardDescription>
+        <CardDescription>Download your transaction data or a full backup of all your data</CardDescription>
       </CardHeader>
-      <CardContent>
-        <Button onClick={handleExport} disabled={isExporting} variant="outline" className="w-full sm:w-auto">
+      <CardContent className="flex flex-col sm:flex-row gap-4">
+        <Button onClick={handleExportCSV} disabled={isExportingCSV || isExportingJSON} variant="outline" className="w-full sm:w-auto">
           <Download className="mr-2 h-4 w-4" />
-          {isExporting ? 'Exporting...' : 'Export Transactions (CSV)'}
+          {isExportingCSV ? 'Exporting...' : 'Export Transactions (CSV)'}
+        </Button>
+        <Button onClick={handleExportJSON} disabled={isExportingCSV || isExportingJSON} variant="outline" className="w-full sm:w-auto">
+          <Download className="mr-2 h-4 w-4" />
+          {isExportingJSON ? 'Exporting...' : 'Export Full Backup (JSON)'}
         </Button>
       </CardContent>
     </Card>

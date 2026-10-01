@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Home, List, Plus, Wallet, MoreHorizontal } from 'lucide-react';
+import { QuickAddModal } from '@/components/transactions/quick-add-modal';
 
 export function MobileNav() {
   const pathname = usePathname();
@@ -23,15 +24,9 @@ export function MobileNav() {
         
         if (item.isFab) {
           return (
-            <Link 
-              key="fab" 
-              href={item.href}
-              className="relative -top-5 flex flex-col items-center justify-center"
-            >
-              <div className="h-14 w-14 rounded-full bg-primary text-white flex items-center justify-center shadow-md hover:bg-primary-hover hover:scale-105 transition-transform">
-                <item.icon className="w-6 h-6" />
-              </div>
-            </Link>
+            <div key="fab" className="relative -top-5 flex flex-col items-center justify-center">
+              <QuickAddModal />
+            </div>
           );
         }
 

@@ -11,9 +11,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner'; // assuming sonner or similar is used, else standard alert or we just handle it.
+import { toast } from 'sonner';
 
-export function CategoryForm() {
+interface CategoryFormProps {
+  parentCategories?: { id: string; name: string; type: string }[];
+}
+
+export function CategoryForm({ parentCategories = [] }: CategoryFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -30,23 +34,27 @@ export function CategoryForm() {
       type: 'EXPENSE',
       icon: '',
       color: '',
+      parentId: null,
     },
   });
 
   const typeValue = watch('type');
+  const parentIdValue = watch('parentId');
+
+  const filteredParentCategories = parentCategories.filter(c => c.type === typeValue);
 
   const onSubmit = async (data: CreateCategoryInput) => {
     setIsLoading(true);
     try {
       const result = await createCategoryAction(data);
       if (result.success) {
-        toast.success?.('Category created successfully') || alert('Category created successfully');
+        toast.success('Category created successfully');
         router.push('/categories');
       } else {
-        toast.error?.(result.error) || alert(result.error);
+        toast.error(result.error);
       }
     } catch (error) {
-      toast.error?.('An error occurred') || alert('An error occurred');
+      toast.error('An error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -74,7 +82,10 @@ export function CategoryForm() {
             <Label htmlFor="type">Type</Label>
             <Select
               value={typeValue}
-              onValueChange={(val) => val && setValue('type', val as 'EXPENSE' | 'INCOME')}
+              onValueChange={(val) => {
+                setValue('type', val as 'EXPENSE' | 'INCOME');
+                setValue('parentId', null);
+              }}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select type" />
@@ -85,6 +96,25 @@ export function CategoryForm() {
               </SelectContent>
             </Select>
             {errors.type && <p className="text-sm text-red-500">{errors.type.message}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="parentId">Parent Category (Optional)</Label>
+            <Select
+              value={parentIdValue || 'none'}
+              onValueChange={(val) => setValue('parentId', val === 'none' ? null : val)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a parent category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None (Top level)</SelectItem>
+                {filteredParentCategories.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.parentId && <p className="text-sm text-red-500">{errors.parentId.message}</p>}
           </div>
 
           <div className="space-y-2">

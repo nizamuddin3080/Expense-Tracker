@@ -1,6 +1,7 @@
 import { Sidebar } from './sidebar';
 import { Header } from './header';
 import { MobileNav } from './mobile-nav';
+import { Fab } from './fab';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -16,6 +17,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </main>
         
+        <Fab />
         <MobileNav />
       </div>
     </div>

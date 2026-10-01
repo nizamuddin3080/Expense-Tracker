@@ -146,3 +146,60 @@ export async function getSpendingTrendReport(days: number = 30) {
     amount,
   }));
 }
+
+export async function getAccountBalanceReport() {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error('Unauthorized');
+
+  const accounts = await db.account.findMany({
+    where: {
+      userId: session.user.id,
+      isActive: true,
+    },
+    select: {
+      name: true,
+      openingBalance: true,
+      type: true,
+    }
+  });
+
+  return accounts.map(acc => ({
+    accountName: acc.name,
+    balance: Number(acc.openingBalance),
+    type: acc.type,
+  }));
+}
+
+export async function getTopMerchantsReport(limit: number = 10) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error('Unauthorized');
+
+  const transactions = await db.transaction.findMany({
+    where: {
+      userId: session.user.id,
+      isDeleted: false,
+      type: 'EXPENSE',
+      merchant: {
+        not: null,
+      },
+    },
+    select: {
+      merchant: true,
+      amount: true,
+    }
+  });
+
+  const merchantMap = new Map<string, number>();
+
+  for (const tx of transactions) {
+    if (tx.merchant) {
+      const current = merchantMap.get(tx.merchant) || 0;
+      merchantMap.set(tx.merchant, toDecimal(current).plus(tx.amount).toNumber());
+    }
+  }
+
+  return Array.from(merchantMap.entries())
+    .map(([merchant, amount]) => ({ merchant, amount }))
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, limit);
+}

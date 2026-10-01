@@ -1,10 +1,21 @@
 import { Metadata } from 'next';
-import { getIncomeVsExpenseReport, getExpenseByCategoryReport, getSpendingTrendReport } from '@/server/queries/report.queries';
+import { 
+  getIncomeVsExpenseReport, 
+  getExpenseByCategoryReport, 
+  getSpendingTrendReport,
+  getAccountBalanceReport,
+  getTopMerchantsReport
+} from '@/server/queries/report.queries';
 import { IncomeExpenseChart } from '@/components/reports/income-expense-chart';
 import { CategoryChart } from '@/components/reports/category-chart';
 import { TrendChart } from '@/components/reports/trend-chart';
+import { AccountBalanceChart } from '@/components/reports/account-balance-chart';
+import { MerchantsChart } from '@/components/reports/merchants-chart';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { startOfMonth, endOfMonth } from 'date-fns';
+import { Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { exportTransactionsCSV } from '@/server/actions/export.actions';
 
 export const metadata: Metadata = {
   title: 'Reports & Analytics | FinTrack',
@@ -14,16 +25,27 @@ export const metadata: Metadata = {
 export default async function ReportsPage() {
   const currentDate = new Date();
   
-  const [incomeVsExpense, categoryExpense, spendingTrend] = await Promise.all([
+  const [incomeVsExpense, categoryExpense, spendingTrend, accountBalances, topMerchants] = await Promise.all([
     getIncomeVsExpenseReport(6),
     getExpenseByCategoryReport(startOfMonth(currentDate), endOfMonth(currentDate)),
     getSpendingTrendReport(30),
+    getAccountBalanceReport(),
+    getTopMerchantsReport(10),
   ]);
 
   return (
     <div className="flex-1 space-y-6 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">Reports & Analytics</h1>
+        <form action={async () => {
+          'use server';
+          await exportTransactionsCSV();
+        }}>
+          <Button type="submit">
+            <Download className="mr-2 h-4 w-4" />
+            Download CSV
+          </Button>
+        </form>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
@@ -52,7 +74,7 @@ export default async function ReportsPage() {
         </Card>
       </div>
       
-      <div className="grid gap-6">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Spending Trend</CardTitle>
@@ -62,6 +84,32 @@ export default async function ReportsPage() {
           </CardHeader>
           <CardContent className="pl-2">
             <TrendChart data={spendingTrend} />
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Account Balances</CardTitle>
+            <CardDescription>
+              Current balances across your active accounts.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pl-2">
+            <AccountBalanceChart data={accountBalances} />
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-1">
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Merchants</CardTitle>
+            <CardDescription>
+              Your top 10 merchants by total spending.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pl-2">
+            <MerchantsChart data={topMerchants} />
           </CardContent>
         </Card>
       </div>

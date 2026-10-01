@@ -139,7 +139,7 @@ This document is the actionable development checklist for the Personal Expense T
 - [ ] Build account detail page (/accounts/[id]) — P1
   - Dependencies: Account page
   - AC: Page shows detailed account info, current calculated balance, and a paginated list of transaction history specifically for this account.
-- [ ] Build edit account form — P1
+- [x] Build edit account form — P1
   - Dependencies: Account detail
   - AC: Form allows editing name and type. The opening balance cannot be edited if transactions already exist. Includes a deactivate/soft-delete option.
 - [x] Implement balance calculation service — P0
@@ -162,16 +162,16 @@ This document is the actionable development checklist for the Personal Expense T
 - [x] Build transaction creation form — P0
   - Dependencies: Actions, Categories, Accounts
   - AC: Segmented control for Type (Expense/Income/Transfer). Amount field auto-focuses. Category dropdown includes search/filter. Submits successfully and clears in < 10 seconds.
-- [ ] Build quick-add transaction modal — P0
+- [x] Build quick-add transaction modal — P0
   - Dependencies: Transaction form
   - AC: Modal/slide-over containing the transaction form. Accessible from a Floating Action Button (FAB) or keyboard shortcut globally.
-- [ ] Build transaction detail/edit page — P1
+- [x] Build transaction detail/edit page — P1
   - Dependencies: Transaction form
   - AC: View mode for transaction details. Edit mode pre-populates the form. Delete button includes a confirmation dialog. Shows creation/update timestamps.
-- [ ] Implement transaction search — P0
+- [x] Implement transaction search — P0
   - Dependencies: Transaction list
   - AC: Search input filters in real-time across merchant, note, and amount fields. Input is debounced (300ms) to prevent excessive DB calls. Combinable with other filters.
-- [ ] Implement advanced filters — P1
+- [x] Implement advanced filters — P1
   - Dependencies: Transaction list
   - AC: Expandable filter section: specific date range, select account, select category, min/max amount, tags, and has attachment checkbox.
 - [ ] Implement transaction sorting — P1
@@ -203,7 +203,7 @@ This document is the actionable development checklist for the Personal Expense T
 - [x] Build create/edit category form — P0
   - Dependencies: Category page
   - AC: Form fields for Name, Type, Icon Picker component, optional Hex color picker, optional Parent category dropdown. Inline Zod validation.
-- [ ] Build subcategory management — P1
+- [x] Build subcategory management — P1
   - Dependencies: Category page
   - AC: Category list is expandable (accordion or tree view) to show subcategories. Allows adding a subcategory directly under a specific parent.
 - [ ] Implement category reordering — P2
@@ -232,7 +232,7 @@ This document is the actionable development checklist for the Personal Expense T
 - [ ] Build upcoming recurring list — P2
   - Dependencies: Recurring transactions
   - AC: A card displaying the next 5-7 upcoming recurring transactions with their estimated due date and amount.
-- [ ] Implement dashboard loading state — P0
+- [x] Implement dashboard loading state — P0
   - Dependencies: Dashboard
   - AC: Skeleton loader cards render immediately while dashboard data is fetched.
 - [x] Implement dashboard empty state — P0
@@ -255,7 +255,7 @@ This document is the actionable development checklist for the Personal Expense T
 - [x] Build budget progress visualization — P0
   - Dependencies: Budget page
   - AC: Progress bars fill based on percentage spent. Color coding logic: Green (<80%), Amber (80-99%), Red (100%+). Text explicitly states "৳X spent of ৳Y budgeted".
-- [ ] Implement copy budgets from previous month — P1
+- [x] Implement copy budgets from previous month — P1
   - Dependencies: Budget CRUD
   - AC: Action button to duplicate all budget limits from the previous month into the currently selected month. Button is only active if current month has no configured budgets.
 - [ ] Build budget vs actual report section — P2
@@ -263,36 +263,36 @@ This document is the actionable development checklist for the Personal Expense T
   - AC: Visual report using a grouped bar chart comparing the budgeted amount versus the actual spent amount side-by-side for each categorized budget.
 
 ## Phase 9 — Recurring Transactions (V1.1)
-- [ ] Create recurring transaction Zod schemas — P1
+- [x] Create recurring transaction Zod schemas — P1
   - Dependencies: Phase 2
   - AC: Validates recurring template fields: type, amount, frequency (Daily, Weekly, Monthly, Yearly), interval, start date, end date, account, category.
-- [ ] Create recurring transaction server actions — P1
+- [x] Create recurring transaction server actions — P1
   - Dependencies: Schemas
   - AC: Create, update, delete templates. Action to toggle template active/inactive state.
-- [ ] Create recurring transaction processing service — P1
+- [x] Create recurring transaction processing service — P1
   - Dependencies: Actions
   - AC: Background service or check function that finds due templates, generates the actual transaction record, and updates the template's `nextDueDate` based on its frequency.
-- [ ] Build recurring transactions page (/recurring) — P1
+- [x] Build recurring transactions page (/recurring) — P1
   - Dependencies: Queries, Actions
   - AC: View a list of all active/inactive recurring transactions showing frequency, next due date, amount, and a quick toggle switch for status.
-- [ ] Build create/edit recurring transaction form — P1
+- [x] Build create/edit recurring transaction form — P1
   - Dependencies: Recurring page
   - AC: Form to define the template. Similar to standard transaction form but adds frequency selection and date range logic. Validates properly.
-- [ ] Implement auto-processing of due recurring transactions — P2
+- [x] Implement auto-processing of due recurring transactions — P2
   - Dependencies: Processing service
   - AC: Since background cron jobs can be tricky in serverless Next.js, implement a check that runs on user login or dashboard load to synchronously process any due recurring items.
 
 ## Phase 10 — Savings Goals (V1.1)
-- [ ] Create savings goal Zod schemas — P1
+- [x] Create savings goal Zod schemas — P1
   - Dependencies: Phase 2
   - AC: Schema validates goal name, target amount (decimal), target date, and initial/current amount.
-- [ ] Create savings goal server actions — P1
+- [x] Create savings goal server actions — P1
   - Dependencies: Schemas
   - AC: Create, update, delete goals. Actions to add a contribution transaction or withdraw from a goal. Action to mark goal as complete.
-- [ ] Build savings goals page (/goals) — P1
+- [x] Build savings goals page (/goals) — P1
   - Dependencies: Queries, Actions
   - AC: Display goals as cards. Each card shows percentage complete, current vs target amounts, a visual progress bar, and an "Add Funds" button. Includes empty/loading states.
-- [ ] Build goal detail view — P2
+- [x] Build goal detail view — P2
   - Dependencies: Goals page
   - AC: Detailed view showing goal metadata, large progress visualization, and a list of historical contribution/withdrawal transactions specific to this goal.
 
@@ -309,16 +309,16 @@ This document is the actionable development checklist for the Personal Expense T
 - [x] Implement spending trend report — P1
   - Dependencies: Reports page
   - AC: Line chart showing daily or weekly expense trend over time within the selected date range.
-- [ ] Implement account balance report — P2
+- [x] Implement account balance report — P2
   - Dependencies: Reports page
   - AC: Bar chart visualizing the current balances of all active accounts side-by-side.
 - [ ] Implement budget vs actual report — P2
   - Dependencies: Budget queries
   - AC: A comprehensive side-by-side comparison chart for all budgeted categories.
-- [ ] Implement top merchants report — P2
+- [x] Implement top merchants report — P2
   - Dependencies: Reports page
   - AC: Horizontal bar chart showing the top 10 merchants or payees based on total spending volume.
-- [ ] Implement report data export — P2
+- [x] Implement report data export — P2
   - Dependencies: Reports
   - AC: A button to export the raw data currently visualized in the active report as a CSV file.
 
@@ -326,13 +326,13 @@ This document is the actionable development checklist for the Personal Expense T
 - [x] Implement CSV export — P0
   - Dependencies: Transaction queries
   - AC: Server action or API route that generates a CSV containing all user transactions. Includes all fields (Date, Amount, Type, Category, Account, Note). Formats BDT correctly. Downloads as a file to the client.
-- [ ] Implement JSON backup export — P1
+- [x] Implement JSON backup export — P1
   - Dependencies: All entities
   - AC: Generates a single massive JSON payload containing all the user's data (accounts, categories, transactions, budgets, settings). Useful for account migration.
-- [ ] Implement CSV import — P1
+- [x] Implement CSV import — P1
   - Dependencies: Transaction creation
   - AC: UI to upload a CSV file. A column mapping step allows the user to match their CSV columns to database fields. Implements duplicate detection logic based on matching date, amount, account, and merchant.
-- [ ] Implement import validation and error reporting — P1
+- [x] Implement import validation and error reporting — P1
   - Dependencies: CSV import
   - AC: Pre-validates the CSV before inserting into DB. Shows specific errors per row (e.g., "Invalid amount on row 5"). Allows the user to choose to skip invalid rows and proceed, showing a success summary afterward.
 
@@ -357,10 +357,10 @@ This document is the actionable development checklist for the Personal Expense T
 - [x] Implement bottom navigation bar — P0
   - Dependencies: Layout
   - AC: On viewports < 768px, hide the sidebar and render a fixed bottom navigation bar with 5 icons: Dashboard, Transactions, Quick Add (centered, distinct styling), Accounts, More/Settings. Active route indicator works.
-- [ ] Implement floating action button — P0
+- [x] Implement floating action button — P0
   - Dependencies: Quick-add modal
   - AC: A prominent FAB is persistently visible in the bottom right (or center of bottom nav) on mobile devices to trigger the quick-add transaction modal instantly.
-- [ ] Convert tables to cards on mobile — P1
+- [x] Convert tables to cards on mobile — P1
   - Dependencies: Transaction list, other tables
   - AC: All HTML `<table>` elements used for lists transform into stacked CSS Grid or Flexbox card layouts when the viewport is below the 640px breakpoint to ensure readability.
 - [ ] Add PWA manifest and service worker — P3
@@ -462,3 +462,4 @@ This document is the actionable development checklist for the Personal Expense T
 | 15 | Testing | 0 | ⬜ Not Started |
 | 16 | Security Audit | 2 | ⬜ Not Started |
 | 17 | Deployment | 8 | 🔶 Build Passes |
+

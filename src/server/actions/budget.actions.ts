@@ -90,3 +90,49 @@ export async function deleteBudgetAction(id: string): Promise<ActionResult<any>>
     return { success: false, error: error.message || 'Failed to delete budget' };
   }
 }
+
+export async function copyBudgetsFromPreviousMonth(month: number, year: number): Promise<ActionResult<number>> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, error: 'Unauthorized' };
+    }
+    const userId = session.user.id;
+
+    const prevMonth = month === 1 ? 12 : month - 1;
+    const prevYear = month === 1 ? year - 1 : year;
+
+    const prevBudgets = await db.budget.findMany({
+      where: { userId, month: prevMonth, year: prevYear },
+    });
+
+    if (!prevBudgets.length) {
+      return { success: false, error: 'No budgets found in the previous month to copy.' };
+    }
+
+    let copied = 0;
+    for (const pb of prevBudgets) {
+      const exists = await db.budget.findFirst({
+        where: { userId, categoryId: pb.categoryId, month, year },
+      });
+      if (!exists) {
+        await db.budget.create({
+          data: {
+            userId,
+            categoryId: pb.categoryId,
+            amount: pb.amount,
+            month,
+            year,
+          },
+        });
+        copied++;
+      }
+    }
+
+    revalidatePath('/budgets');
+    return { success: true, data: copied };
+  } catch (error: any) {
+    console.error('Copy budget error:', error);
+    return { success: false, error: 'Failed to copy budgets' };
+  }
+}

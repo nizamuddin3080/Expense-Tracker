@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { formatCurrency } from '@/lib/format';
 import { PlusCircle } from 'lucide-react';
+import { CopyBudgetsButton } from '@/components/budgets/copy-budgets-button';
 
 export const metadata = {
   title: 'Budgets - FinTrack',
@@ -33,6 +34,7 @@ export default async function BudgetsPage({
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <CopyBudgetsButton month={month} year={year} />
           <Link href="/budgets/new" className={buttonVariants()}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Budget

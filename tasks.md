@@ -116,7 +116,7 @@ This document is the actionable development checklist for the Personal Expense T
 - [ ] Implement rate limiting on auth endpoints — P2
   - Dependencies: Auth setup
   - AC: Implement basic rate limiting (e.g., using Upstash or memory). Max 5 login attempts per minute per IP. Returns 429 status code after limit reached.
-- [ ] Create user settings/profile management — P1
+- [x] Create user settings/profile management — P1
   - Dependencies: Auth, Settings page
   - AC: Profile page allows user to update name and email. Password change form requires current password to proceed.
 
@@ -142,7 +142,7 @@ This document is the actionable development checklist for the Personal Expense T
 - [ ] Build edit account form — P1
   - Dependencies: Account detail
   - AC: Form allows editing name and type. The opening balance cannot be edited if transactions already exist. Includes a deactivate/soft-delete option.
-- [ ] Implement balance calculation service — P0
+- [x] Implement balance calculation service — P0
   - Dependencies: Transaction model
   - AC: Utility function: Balance = opening + income - expense + transfersIn - transfersOut. Excludes soft-deleted transactions. Uses Decimal.js for precise math.
 
@@ -211,22 +211,22 @@ This document is the actionable development checklist for the Personal Expense T
   - AC: Use drag-and-drop (`dnd-kit`) or up/down arrow buttons to reorder categories. New order index persists in the database.
 
 ## Phase 7 — Dashboard
-- [ ] Create dashboard queries (aggregations) — P0
+- [x] Create dashboard queries (aggregations) — P0
   - Dependencies: Transactions, Accounts
   - AC: Optimized Prisma queries to calculate: Total balance across all accounts, current month's income, current month's expense, net cash flow. Excludes transfers from income/expense calculations.
-- [ ] Build stat cards row — P0
+- [x] Build stat cards row — P0
   - Dependencies: Dashboard queries
   - AC: Top of dashboard renders 4 metric cards: Total Balance, Monthly Income, Monthly Expense, Net Cash Flow. Values format properly in BDT. Responsive grid layout.
-- [ ] Build secondary metrics — P1
+- [x] Build secondary metrics — P1
   - Dependencies: Dashboard queries
   - AC: Additional UI to show savings rate (%), today's spending total, and a high-level budget usage summary.
-- [ ] Build spending by category chart — P0
+- [x] Build spending by category chart — P0
   - Dependencies: Dashboard queries, Chart library
   - AC: Use Recharts or shadcn/ui charts to render a Donut/Pie chart of current month's expenses grouped by category. Includes an interactive legend.
-- [ ] Build monthly trend chart — P1
+- [x] Build monthly trend chart — P1
   - Dependencies: Dashboard queries, Chart library
   - AC: Bar chart comparing total income vs total expense per month for the last 6 months. Responsive and clearly labeled.
-- [ ] Build recent transactions list — P0
+- [x] Build recent transactions list — P0
   - Dependencies: Transaction queries
   - AC: A minimalist list of the 10 most recent transactions displayed on the dashboard. Shows date, merchant/category, and amount (red for expense, green for income). Link to `/transactions`.
 - [ ] Build upcoming recurring list — P2
@@ -235,24 +235,24 @@ This document is the actionable development checklist for the Personal Expense T
 - [ ] Implement dashboard loading state — P0
   - Dependencies: Dashboard
   - AC: Skeleton loader cards render immediately while dashboard data is fetched.
-- [ ] Implement dashboard empty state — P0
+- [x] Implement dashboard empty state — P0
   - Dependencies: Dashboard
   - AC: If no accounts or transactions exist, dashboard shows a welcoming "Getting Started" message with clear CTA buttons to add an account and add a first transaction.
 
 ## Phase 8 — Budgets
-- [ ] Create budget Zod validation schemas — P0
+- [x] Create budget Zod validation schemas — P0
   - Dependencies: Phase 2
   - AC: Schema validates categoryId, amount (positive decimal), month (1-12 integer), year (4-digit integer).
-- [ ] Create budget server actions (CRUD) — P0
+- [x] Create budget server actions (CRUD) — P0
   - Dependencies: Schemas
   - AC: Actions to create, update, delete budgets. Database constraints ensure only one budget exists per category per month/year combination.
-- [ ] Create budget queries — P0
+- [x] Create budget queries — P0
   - Dependencies: Prisma client
   - AC: Fetch all budgets for a specific month/year. Query must aggregate actual spent amounts from transactions for that category and compare it against the budget limit.
-- [ ] Build budget management page (/budgets) — P0
+- [x] Build budget management page (/budgets) — P0
   - Dependencies: Queries, Actions
   - AC: Page includes a Month/Year selector toggle. Renders budget cards for each configured category showing a visual progress bar. Includes an "Add Budget" form modal.
-- [ ] Build budget progress visualization — P0
+- [x] Build budget progress visualization — P0
   - Dependencies: Budget page
   - AC: Progress bars fill based on percentage spent. Color coding logic: Green (<80%), Amber (80-99%), Red (100%+). Text explicitly states "৳X spent of ৳Y budgeted".
 - [ ] Implement copy budgets from previous month — P1
@@ -297,16 +297,16 @@ This document is the actionable development checklist for the Personal Expense T
   - AC: Detailed view showing goal metadata, large progress visualization, and a list of historical contribution/withdrawal transactions specific to this goal.
 
 ## Phase 11 — Reports
-- [ ] Build reports page shell (/reports) — P1
+- [x] Build reports page shell (/reports) — P1
   - Dependencies: Chart library
   - AC: Layout includes a global date range selector component. Sidebar or tabs to switch between different report types. Fully responsive layout.
-- [ ] Implement income vs expense report — P0
+- [x] Implement income vs expense report — P0
   - Dependencies: Reports page
   - AC: Grouped bar chart comparing total income and total expense per month. Viewable for last 6 or 12 months. Strict exclusion of transfer transactions.
-- [ ] Implement expense by category report — P0
+- [x] Implement expense by category report — P0
   - Dependencies: Reports page
   - AC: Detailed Pie/Donut chart of expenses grouped by category for the selected global date range. Interactive legend showing exact amounts and percentages.
-- [ ] Implement spending trend report — P1
+- [x] Implement spending trend report — P1
   - Dependencies: Reports page
   - AC: Line chart showing daily or weekly expense trend over time within the selected date range.
 - [ ] Implement account balance report — P2
@@ -323,7 +323,7 @@ This document is the actionable development checklist for the Personal Expense T
   - AC: A button to export the raw data currently visualized in the active report as a CSV file.
 
 ## Phase 12 — Import/Export
-- [ ] Implement CSV export — P0
+- [x] Implement CSV export — P0
   - Dependencies: Transaction queries
   - AC: Server action or API route that generates a CSV containing all user transactions. Includes all fields (Date, Amount, Type, Category, Account, Note). Formats BDT correctly. Downloads as a file to the client.
 - [ ] Implement JSON backup export — P1
@@ -354,7 +354,7 @@ This document is the actionable development checklist for the Personal Expense T
 - [ ] Optimize all pages for mobile viewport — P0
   - Dependencies: All pages built
   - AC: Audit every page at 320px, 375px, and 640px widths. Ensure no horizontal scrolling occurs. Buttons and inputs must have adequate touch targets (min 44px height).
-- [ ] Implement bottom navigation bar — P0
+- [x] Implement bottom navigation bar — P0
   - Dependencies: Layout
   - AC: On viewports < 768px, hide the sidebar and render a fixed bottom navigation bar with 5 icons: Dashboard, Transactions, Quick Add (centered, distinct styling), Accounts, More/Settings. Active route indicator works.
 - [ ] Implement floating action button — P0
@@ -405,7 +405,7 @@ This document is the actionable development checklist for the Personal Expense T
   - AC: Confirm that `prisma.$queryRaw` is completely avoided or heavily parameterized. Ensure Prisma's ORM methods are used exclusively for DB interaction to prevent SQL injection natively.
 
 ## Phase 17 — Production Deployment
-- [ ] Create production build and test — P0
+- [x] Create production build and test — P0
   - Dependencies: All MVP features
   - AC: Running `npm run build` locally outputs a successful production build with zero Next.js compilation errors. `npm run start` serves the build correctly.
 - [ ] Set up MySQL on production server — P0
@@ -445,20 +445,20 @@ This document is the actionable development checklist for the Personal Expense T
 | Phase | Tasks | MVP Critical (P0) | Status |
 |-------|-------|--------------------|--------|
 | 0 | Documentation | 7 | ✅ Complete |
-| 1 | Project Setup | 9 | ⬜ Not Started |
-| 2 | Database | 4 | ⬜ Not Started |
-| 3 | Authentication | 5 | ⬜ Not Started |
-| 4 | Accounts | 5 | ⬜ Not Started |
-| 5 | Transactions | 6 | ⬜ Not Started |
-| 6 | Categories | 4 | ⬜ Not Started |
-| 7 | Dashboard | 5 | ⬜ Not Started |
-| 8 | Budgets | 3 | ⬜ Not Started |
-| 9 | Recurring (V1.1) | 0 | ⬜ Not Started |
-| 10 | Savings Goals (V1.1) | 0 | ⬜ Not Started |
-| 11 | Reports | 2 | ⬜ Not Started |
-| 12 | Import/Export | 1 | ⬜ Not Started |
+| 1 | Project Setup | 9 | ✅ Complete |
+| 2 | Database | 4 | ✅ Complete |
+| 3 | Authentication | 5 | ✅ Complete |
+| 4 | Accounts | 5 | ✅ Complete |
+| 5 | Transactions | 6 | ✅ Core Complete |
+| 6 | Categories | 4 | ✅ Complete |
+| 7 | Dashboard | 5 | ✅ Core Complete |
+| 8 | Budgets | 3 | ✅ Core Complete |
+| 9 | Recurring (V1.1) | 0 | 📋 Placeholder |
+| 10 | Savings Goals (V1.1) | 0 | 📋 Placeholder |
+| 11 | Reports | 2 | ✅ Core Complete |
+| 12 | Import/Export | 1 | 🔶 CSV Export Done |
 | 13 | Attachments (V1.1) | 0 | ⬜ Not Started |
-| 14 | Mobile/PWA | 3 | ⬜ Not Started |
+| 14 | Mobile/PWA | 3 | 🔶 Bottom Nav Done |
 | 15 | Testing | 0 | ⬜ Not Started |
 | 16 | Security Audit | 2 | ⬜ Not Started |
-| 17 | Deployment | 8 | ⬜ Not Started |
+| 17 | Deployment | 8 | 🔶 Build Passes |
